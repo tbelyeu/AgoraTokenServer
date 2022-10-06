@@ -64,13 +64,13 @@ let beneficiaryQueue = new Queue();
 
 function generateChannelName()
 {
-    let channelName = Math.floor(Math.random() * 1000000000); // channel name is 0 to 1 billion (not sure what the limits of a valid channel b)
+    let channelName = Math.floor(Math.random() * 5000000000000000); // channel name is 0 to 5 quadrillion 
     return channelName.toString();
 }
 
 function printQueues()
 {
-    var str = "Volunteer Queue: ";
+    var str = "\nVolunteer Queue: ";
     for(var i = 0; i < volunteerQueue.items.length; i++)
         str += volunteerQueue.items[i].id + ", ";
     str += "\nBeneficiary Queue: "
@@ -105,7 +105,8 @@ const handleCaller = (req, res) =>
                 ben_id = beneficiaryQueue.dequeue().id;
                 printQueues();
 
-                return res.json({ 'beneficiary_id': ben_id, 'volunteer_id': vol_id, 'channelName': channelName });
+                // return res.json({ 'beneficiary_id': ben_id, 'volunteer_id': vol_id, 'channelName': channelName });
+                return res.json({ 'channelName': channelName });
             }
             break;
         case 'beneficiary':
@@ -121,7 +122,8 @@ const handleCaller = (req, res) =>
                 vol_id = volunteerQueue.dequeue().id;
                 printQueues();
 
-                return res.json({ 'beneficiary_id': ben_id, 'volunteer_id': vol_id, 'channelName': channelName });
+                // return res.json({ 'beneficiary_id': ben_id, 'volunteer_id': vol_id, 'channelName': channelName });
+                return res.json({ 'channelName': channelName });
             }
             break;
     }
