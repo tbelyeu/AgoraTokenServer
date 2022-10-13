@@ -70,10 +70,10 @@ function generateChannelName()
 
 function printQueues()
 {
-    var str = "\nVolunteer Queue: ";
+    var str = `\n[${volunteerQueue.items.length}]Volunteer Queue: `;
     for(var i = 0; i < volunteerQueue.items.length; i++)
         str += volunteerQueue.items[i].id + ", ";
-    str += "\nBeneficiary Queue: "
+    str += `\n[${beneficiaryQueue.items.length}]Beneficiary Queue: `
     for(var i = 0; i < beneficiaryQueue.items.length; i++)
         str += beneficiaryQueue.items[i].id + ", ";
     console.log(str);
@@ -83,56 +83,52 @@ const handleCaller = (req, res) =>
 {
     const user_id = req.query.id;
     const user_type = req.query.type;
-    const user = { id: user_id, type: user_type };
-    if (!user.type || (user.type != 'volunteer' && user.type != 'beneficiary'))
+    const user = { id: user_id, type: user_type , channel: ""};
+    if (!user.type || (user.type != 'v' && user.type != 'b'))
         return res.status(500).json({ 'error': 'user type is invalid' });
 
-    let channelName = '';
-    let vol_id = '';
-    let ben_id = '';
     switch (user.type)
     {
-        case 'volunteer':
+        case 'v':
             if (beneficiaryQueue.isEmpty())     // no beneficiaries waiting => enqueue this user until one is
             {
+                user.channel = generateChannelName();
                 volunteerQueue.enqueue(user);
                 printQueues();
+                
+                console.log (`Sending channel ${user.channel} to user ${user.id}.`);
+                return res.json({ 'channelName': user.channel });
             }    
             else                                // there is a beneficiary waiting => generate a channel name, dequeue the beneficiary, and then return channel name
             {
-                channelName = generateChannelName();
-                vol_id = user.id;
-                ben_id = beneficiaryQueue.dequeue().id;
+                user.channel = beneficiaryQueue.dequeue().channel;
                 printQueues();
 
-                // return res.json({ 'beneficiary_id': ben_id, 'volunteer_id': vol_id, 'channelName': channelName });
-                return res.json({ 'channelName': channelName });
+                console.log (`Sending channel ${user.channel} to user ${user.id}.`);
+                return res.json({ 'channelName': user.channel });
             }
-            break;
-        case 'beneficiary':
+        case 'b':
             if (volunteerQueue.isEmpty())       // no volunteers waiting => enqueue this user until one is
             {
+                user.channel = generateChannelName();
                 beneficiaryQueue.enqueue(user);
                 printQueues();
+
+                console.log (`Sending channel ${user.channel} to user ${user.id}.`);
+                return res.json({ 'channelName': user.channel });
             }   
             else                                // there is a volunteer waiting => 
             {
-                channelName = generateChannelName();
-                ben_id = user.id;
-                vol_id = volunteerQueue.dequeue().id;
+                user.channel = volunteerQueue.dequeue().channel;
                 printQueues();
 
-                // return res.json({ 'beneficiary_id': ben_id, 'volunteer_id': vol_id, 'channelName': channelName });
-                return res.json({ 'channelName': channelName });
+                console.log (`Sending channel ${user.channel} to user ${user.id}.`);
+                return res.json({ 'channelName': user.channel });
             }
-            break;
     }
 }
 
 // this does not yet send the channel name to the user waiting in queue
 app.get('/new_caller', handleCaller);
-
-
-
 
 app.listen(PORT, () => { console.log(`Listening on port: ${PORT}`); });
