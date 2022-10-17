@@ -4,8 +4,7 @@ const {RtcTokenBuilder, RtcRole} = require('agora-access-token');
 require('dotenv').config();
 const APP_ID = process.env.APP_ID;
 const APP_CERTIFICATE = process.env.APP_CERTIFICATE;
-//const PORT = process.env.PORT; not working idk why
-const PORT = 8080;
+const PORT = process.env.PORT;
 
 const app = express();
 
@@ -128,7 +127,6 @@ const handleCaller = (req, res) =>
     }
 }
 
-// this does not yet send the channel name to the user waiting in queue
 app.get('/new_caller', handleCaller);
 
 app.listen(PORT, () => { console.log(`Listening on port: ${PORT}`); });
