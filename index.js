@@ -30,13 +30,15 @@ const generateAccessToken = (req, res) =>
     if (!channelName)
         return res.status(500).json({ 'error': 'channel is required' });
     // get uid
-    let uid = req.query.uid;
-    if (!uid || uid == '')
-        uid = 0;
+    // let uid = req.query.uid;
+    // if (!uid || uid == '')
+    //     uid = 0;
+    // set uid = 0 so that token can be used by any user
+    let uid = 0;
     // get role
-    let role = RtcRole.SUBSCRIBER;
-    if (req.query.role == 'publisher')
-        role = RtcRole.PUBLISHER;
+    // let role = RtcRole.SUBSCRIBER;
+    // if (req.query.role == 'publisher')
+    let role = RtcRole.PUBLISHER;
     // get expire time
     let expireTime = req.query.expireTime;
     if (!expireTime || expireTime == '')
