@@ -48,6 +48,7 @@ const generateAccessToken = (req, res) =>
     // calculate privilege expire time
     const currentTime = Math.floor(Date.now() / 1000);
     const privilegeExpireTime = currentTime + expireTime;
+    console.log(privilegeExpireTime);
     // build token
     const token = RtcTokenBuilder.buildTokenWithUid(APP_ID, APP_CERTIFICATE, channelName, uid, role, privilegeExpireTime);
     // return token
@@ -65,7 +66,7 @@ let beneficiaryQueue = new Queue();
 
 function generateChannelName()
 {
-    let channelName = Math.floor(Math.random() * 5000000000000000); // channel name is 0 to 5 quadrillion 
+    let channelName = Math.floor(Math.random() * 5000000000); // channel name is 0 to 5 billion 
     return channelName.toString();
 }
 
