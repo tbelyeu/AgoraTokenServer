@@ -29,15 +29,9 @@ const generateAccessToken = (req, res) =>
     const channelName = req.query.channelName;
     if (!channelName)
         return res.status(500).json({ 'error': 'channel is required' });
-    // get uid
-    // let uid = req.query.uid;
-    // if (!uid || uid == '')
-    //     uid = 0;
     // set uid = 0 so that token can be used by any user
     let uid = 0;
-    // get role
-    // let role = RtcRole.SUBSCRIBER;
-    // if (req.query.role == 'publisher')
+    // set role to Publisher
     let role = RtcRole.PUBLISHER;
     // get expire time
     let expireTime = req.query.expireTime;
@@ -66,7 +60,11 @@ let beneficiaryQueue = new Queue();
 
 function generateChannelName()
 {
-    let channelName = Math.floor(Math.random() * 5000000000); // channel name is 0 to 5 billion 
+    let channelName = Math.floor(Math.random() * 9999999999); // channel name is 0 to 1 trillion
+    while (invalidChannelList.find(channelName.toString()))
+    {
+        channelName = Math.floor(Math.random() * 9999999999);
+    }
     return channelName.toString();
 }
 
@@ -81,7 +79,7 @@ function printQueues()
     console.log(str);
 }
 
-const handleCaller = (req, res) => 
+const enqueueUser = (req, res) => 
 {
     const user_id = req.query.id;
     const user_type = req.query.type;
@@ -130,8 +128,49 @@ const handleCaller = (req, res) =>
     }
 }
 
-app.get('/new_caller', handleCaller);
+app.get('/gen_channel', enqueueUser);
 
-// add an endpoint to flush queues
+// emergency flush queues
+const resetQueues = (req, res) => 
+{
+    const cert = req.query.cert;
+    if (cert == APP_CERTIFICATE)
+    {
+        while (!volunteerQueue.isEmpty)
+            volunteerQueue.dequeue;
+        while (!beneficiaryQueue.isEmpty)
+            beneficiaryQueue.dequeue;
+
+        return res.status(200).json({ 'success': 'queues flushed' });
+    }
+    else
+        return res.status(500).json({ 'error': 'certificate is invalid' });
+}
+
+app.get('/flush_queues', resetQueues);
+
+// invalidate channel after user leaves
+// this prevents a user from connecting to a channel that their partner already left
+let invalidChannelList = [];
+const invalidateChannel = (req, res) =>
+{
+    const channel = req.query.channel;
+    invalidChannelList.push(channel);
+    return res.status(200);
+}
+
+app.get('/invalidate_channel', invalidateChannel);
+
+// check if channel is valid before joining
+const validateChannel = (req, res) =>
+{
+    const channel = req.query.channel;
+    if (invalidChannelList.find(channel))
+        return res.json({ 'is_valid': false });
+    else
+        return res.json({ 'is_valid': true });
+}
+
+app.get('/validate_channel', validateChannel);
 
 app.listen(PORT, () => { console.log(`Listening on port: ${PORT}`); });
