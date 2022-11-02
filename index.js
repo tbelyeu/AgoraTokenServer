@@ -61,7 +61,7 @@ let beneficiaryQueue = new Queue();
 function generateChannelName()
 {
     let channelName = Math.floor(Math.random() * 9999999999); // channel name is 0 to 1 trillion
-    while (invalidChannelList.find(channelName.toString()))
+    while (invalidChannelList.find(element => element == channelName.toString()))
     {
         channelName = Math.floor(Math.random() * 9999999999);
     }
@@ -156,7 +156,8 @@ const invalidateChannel = (req, res) =>
 {
     const channel = req.query.channel;
     invalidChannelList.push(channel);
-    return res.status(200);
+    console.log(`Invalid channels: ${invalidChannelList}`);
+    return res.status(200).json({ 'success': true});
 }
 
 app.get('/invalidate_channel', invalidateChannel);
@@ -165,7 +166,7 @@ app.get('/invalidate_channel', invalidateChannel);
 const validateChannel = (req, res) =>
 {
     const channel = req.query.channel;
-    if (invalidChannelList.find(channel))
+    if (invalidChannelList.find(element => element == channel))
         return res.json({ 'is_valid': false });
     else
         return res.json({ 'is_valid': true });
